@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fastapi-app:latest
+    command: uvicorn main:app --host 0.0.0.0 --port=8000
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.app-http.rule=Host(`testfastapi.rahulmistri.eu.org`)
+      - traefik.http.routers.app-http.tls=true
+      - traefik.http.routers.app-http.tls.certresolver=letsencrypt
+    # network_mode: host
+    # ports:
+    #   - 8000:8000
+    # env_file:
+    #   - .env
+
+  traefik:
+    image: traefik:v2.3
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - $PWD/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - traefik-public-certificates:/certificates
+
+volumes:
+  traefik-public-certificates:

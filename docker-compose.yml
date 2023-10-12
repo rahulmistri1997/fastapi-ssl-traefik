@@ -14,6 +14,14 @@ services:
       - traefik.http.routers.app-http.rule=Host(`testfastapi.rahulmistri.eu.org`)
       - traefik.http.routers.app-http.tls=true
       - traefik.http.routers.app-http.tls.certresolver=letsencrypt
+
+    deploy:
+      mode: replicated
+      replicas: 3
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.apiservice_web.rule=PathPrefix(`/`)"
+    #   - "traefik.http.services.apiservice_web.loadbalancer.server.port=80"
     # network_mode: host
     # ports:
     #   - 8000:8000
@@ -21,12 +29,18 @@ services:
     #   - .env
 
   traefik:
-    image: traefik:v2.3
+    image: traefik
+    # command: 
+    #     - "--api.insecure=true"
+    #     - "--providers.docker=true"
+    #     - "--providers.docker.exposedbydefault=false"
+    #     - "--entrypoints.web.address=:80"
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
+      - 8080:8080 # Traefik dashboard, if needed
     restart: always
+    
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - $PWD/traefik/traefik.toml:/etc/traefik/traefik.toml
